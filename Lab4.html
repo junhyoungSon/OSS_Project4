@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+
+    ul {
+        background-color: rgb(255, 255, 255);
+        list-style-type: none; 
+        padding-left: 0px;
+    }
+
+    input {
+        width: 50px;
+        margin-top: 10px;
+        margin-bottom: 20px;
+    }
+
+    #how{
+        font-weight: bold;
+        padding-bottom: 5px;
+    }
+
+</style>
+
+<!--JS AJAX를 이용한 CRUD 실습-->
+
+<body>
+    <h1>Lab4 : JS AJAX를 이용한 CRUD 실습</h1>
+    <ul><li id="how">사용법 : </li>
+        <li>보기 : [GET]버튼 </li>
+        <li>추가 : 학번, 이름, 전공, 나이 입력 후 [ADD]버튼 => [GET]버튼 (중복학번 불가능)</li>
+        <li>수정 : 학번입력 후 수정할 이름, 전공 나이 입력 후 [EDIT]버튼 => [GET]버튼</li>
+        <li>삭제 : 삭제할 학번 입력 후 [DELETE]버튼 => [GET]버튼</li>
+    </ul>
+
+    <div id="input">
+        <input type="text" id="num" placeholder="학번">
+        <input type="text" id="name" placeholder="이름">
+        <input type="text" id="major" placeholder="전공">
+        <input type="text" id="age" placeholder="나이">
+        <br>
+    </div>
+
+    <button id="get">GET</button>
+    <button id="add">ADD</button>
+    <button id="edit">EDIT</button>
+    <button id="delete">DELETE</button>
+
+    <ul id="list">토레이 학부생 목록 list</ul>
+</body>
+
+</html>
+
+<script>
+    let num = document.getElementById("num");
+    let name = document.getElementById("name");
+    let age = document.getElementById("age");
+    let major = document.getElementById("major");
+
+    document.getElementById("get").addEventListener("click", getStd);
+    document.getElementById("add").addEventListener("click", addStd);
+    document.getElementById("edit").addEventListener("click", editStd);
+    document.getElementById("delete").addEventListener("click", deleteStd);
+
+    function getStd() {
+        //서버접속, 문자열로 가져옴, 객체형태로 바꿈, li만들어서 요소추가
+        //fectch or XMLHttpRequest object 정해야함
+        fetch("http://localhost:3000/students")
+            //then : fetch는 기본적으로 promiss를 반환, 그 promiss반환이 성공적으로 이행됐을때 정보를 response로 줘
+            //response => : 받은 정보를 가지고 이 함수를 실행해줘
+            //response.json() : 응답의 본문을 json문자열에서 JS객체로 변환하여 promise로 반환 
+            .then(response => response.json()) // response, data도 파라미터(변경가능)
+            .then(data => {
+                const list = document.getElementById("list");
+                list.innerHTML = "";
+                data.forEach(user => { //user도 변수명, forEach로 하나 받아온 녀석을 user에 담은 것
+                    const li = document.createElement("li");
+                    li.textContent = `${user.id}. ${user.name}, ${user.major} (${user.age})`; //링크 객체 내의 name, email을 긁어옴
+                    list.appendChild(li);
+                });
+            })
+            .catch(error => {
+                console.error("error", error)
+                alert("데이터를 불러오는데 이상이 있습니다.");
+            }); //console.error는 제공하는 함수
+
+    }
+
+    function addStd() {
+
+        const newStd = {
+            id: num.value,
+            name: name.value,
+            age: parseInt(age.value),
+            major: major.value
+        };
+
+        fetch("http://localhost:3000/students", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(newStd)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('데이터 추가 실패 : ' + response.statusText);
+                }
+
+                return response.json();
+            })
+            .then(data => {
+                console.log("추가 성공 :", data);
+                num.value = '';
+                name.value = '';
+                age.value = '';
+                major.value = '';
+            })
+            .catch(error => {
+                console.error("add error:", error);
+                alert("데이터 추가에 이상이 있습니다.");
+            });
+    }
+
+    function editStd() {
+
+        const stdID = num.value;
+
+        const newStd = {
+            id: num.value,
+            name: name.value,
+            age: parseInt(age.value),
+            major: major.value
+        };
+        fetch("http://localhost:3000/students/" + stdID, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(newStd)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('데이터 수정 실패 : ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("추가 성공 :", data);
+                num.value = '';
+                name.value = '';
+                age.value = '';
+                major.value = '';
+            })
+            .catch(error => {
+                console.error("edit error:", error);
+                alert("데이터 수정에 이상이 있습니다.");
+            });
+    }
+
+    function deleteStd() {
+
+        const stdID = num.value;
+
+        if (!stdID) {
+            alert("삭제할 학생의 학번(num)을 입력해주세요.");
+            return;
+        }
+
+        fetch("http://localhost:3000/students/" + stdID, { method: 'DELETE', })
+
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('데이터 삭제 실패 : ' + response.statusText);
+                }
+                return Promise.resolve();
+            })
+            .then(() => {
+                console.log("삭제 성공 :");
+                num.value = '';
+                name.value = '';
+                age.value = '';
+                major.value = '';
+            })
+            .catch(error => {
+                console.error("edit error:", error);
+                alert("데이터 삭제에 이상이 있습니다.");
+            });
+    }
+</script>

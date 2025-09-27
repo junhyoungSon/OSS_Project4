@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    #text {
+        background-color: aquamarine;
+        width: 40%;
+        padding: 50px;
+        text-align: center;
+    }
+</style>
+
+<!-- Lab1. 타이머 만들기-->
+<body>
+    <div id="textbox">
+    <p id="text">1</p>
+    </div>
+    <button id="startBtn">시작</button>
+    <button id="stopBtn">중지</button>
+</body>
+</html>
+
+<script>
+    const text = document.getElementById("text")
+    const start = document.getElementById("startBtn")
+    const stop = document.getElementById("stopBtn")
+
+    let count = 0;
+    let timer;
+
+    start.addEventListener("click", ()=>{
+        timer = setInterval(() => {
+        count ++;
+        text.innerText = count;
+    }, 1000);
+    });
+
+    stop.addEventListener("click", ()=>{
+        clearInterval(timer);
+
+    });
+</script>

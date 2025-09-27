@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    ul{
+        list-style-type: none;
+    }
+</style>
+
+<!-- Lab3. REST API를 이용하여 데이터 조회하기-->
+<body>
+    <button id="btnList">Get Data</button>
+    <ul id="list"></ul>
+</body>
+
+</html>
+
+<script>
+
+    const list = document.getElementById("list")
+    document.getElementById("btnList").addEventListener("click", getList);
+
+    function getList() {
+        //서버접속, 문자열로 가져옴, 객체형태로 바꿈, li만들어서 요소추가
+        //fectch or XMLHttpRequest object 정해야함
+        fetch("https://jsonplaceholder.typicode.com/users")
+            .then(response => response.json()) // response, data도 파라미터(변경가능)
+            .then(data => {
+                const list = document.getElementById("list");
+                list.innerHTML = "";
+                data.forEach(user => { //user도 변수명, forEach로 하나 받아온 녀석을 user에 담은 것
+                    const li = document.createElement("li");
+                    li.textContent = `- ${user.name} - ${user.email}`; //링크 객체 내의 name, email을 긁어옴
+                    list.appendChild(li);
+                });
+            })
+            .catch(error => console.error("error", error)); //console.error는 제공하는 함수
+    }
+</script>
